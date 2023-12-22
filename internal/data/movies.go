@@ -1,6 +1,8 @@
 package data
 
 import (
+	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/mxygem/greenlight/internal/validator"
@@ -31,4 +33,49 @@ func ValidateMovie(v *validator.Validator, movie *Movie) {
 	v.Check(len(movie.Genres) >= 1, "genres", "must contain at least 1 genre")
 	v.Check(len(movie.Genres) <= 5, "genres", "must not contain more than 5 genres")
 	v.Check(validator.Unique(movie.Genres), "genres", "must not contain duplicate values")
+}
+
+type Movies interface {
+	Insert(movie *Movie) error
+	Get(id int64) (*Movie, error)
+	Update(movie *Movie) error
+	Delete(id int64) error
+}
+
+type MovieModel struct {
+	DB *sql.DB
+}
+
+func (m MovieModel) Insert(movie *Movie) error {
+	return fmt.Errorf("unimplemented")
+}
+
+func (m MovieModel) Get(id int64) (*Movie, error) {
+	return nil, fmt.Errorf("unimplemented")
+}
+
+func (m MovieModel) Update(movie *Movie) error {
+	return fmt.Errorf("unimplemented")
+}
+
+func (m MovieModel) Delete(id int64) error {
+	return fmt.Errorf("unimplemented")
+}
+
+type MockMovieModel struct{}
+
+func (m MockMovieModel) Insert(movie *Movie) error {
+	return fmt.Errorf("mock insert unimplemented")
+}
+
+func (m MockMovieModel) Get(id int64) (*Movie, error) {
+	return nil, fmt.Errorf("mock get unimplemented")
+}
+
+func (m MockMovieModel) Update(movie *Movie) error {
+	return fmt.Errorf("mock update unimplemented")
+}
+
+func (m MockMovieModel) Delete(id int64) error {
+	return fmt.Errorf("mock delete unimplemented")
 }
