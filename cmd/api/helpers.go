@@ -89,7 +89,7 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any
 		}
 	}
 
-	if err := dec.Decode(&struct{}{}); err != nil {
+	if err := dec.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
 		return errors.New("body must only contain a single JSON value")
 	}
 
