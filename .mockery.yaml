@@ -1,0 +1,18 @@
+# all: true
+# Specify file to source top level mock comments from
+boilerplate-file: .mockery_boilerplate.txt
+# Generates EXPECT() methods for mocks
+with-expecter: true
+# Generates mocks in the same package as the found interfaces
+inpackage: true
+# Define location, names, etc. Uses go templating
+dir: "{{ .InterfaceDir }}"
+outpkg: "{{ .PackageName }}"
+filename: "{{ .InterfaceName | snakecase }}_mock.go"
+# The package section allows for defining the packaged and interfaces
+# we want mocks generated for. Normally this will only be our projects
+# but it can also include any arbitrary package in the go ecosystem
+packages:
+  github.com/mxygem/greenlight/internal/data:
+    interfaces:
+      Movies:

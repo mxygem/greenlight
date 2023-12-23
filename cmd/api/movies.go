@@ -31,7 +31,6 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 		Runtime: input.Runtime,
 		Genres:  input.Genres,
 	}
-
 	v := validator.New()
 	if data.ValidateMovie(v, movie); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)

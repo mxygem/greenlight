@@ -3,7 +3,6 @@ package data
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/lib/pq"
@@ -132,22 +131,4 @@ func (m MovieModel) Delete(id int64) error {
 	}
 
 	return nil
-}
-
-type MockMovieModel struct{}
-
-func (m MockMovieModel) Insert(movie *Movie) error {
-	return fmt.Errorf("mock insert unimplemented")
-}
-
-func (m MockMovieModel) Get(id int64) (*Movie, error) {
-	return nil, fmt.Errorf("mock get unimplemented")
-}
-
-func (m MockMovieModel) Update(movie *Movie) error {
-	return fmt.Errorf("mock update unimplemented")
-}
-
-func (m MockMovieModel) Delete(id int64) error {
-	return fmt.Errorf("mock delete unimplemented")
 }
