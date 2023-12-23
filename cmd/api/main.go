@@ -53,7 +53,7 @@ func main() {
 
 	db, err := openDB(cfg)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error(fmt.Sprintf("opening db: %s", err))
 		os.Exit(1)
 	}
 	defer db.Close()
@@ -78,7 +78,7 @@ func main() {
 	logger.Info("starting server", "addr", srv.Addr, "env", cfg.env)
 
 	if err := srv.ListenAndServe(); err != nil {
-		logger.Error(err.Error())
+		logger.Error(fmt.Sprintf("listen and serve: %q", err))
 		os.Exit(1)
 	}
 }
@@ -87,7 +87,7 @@ func main() {
 func openDB(cfg config) (*sql.DB, error) {
 	db, err := sql.Open("postgres", cfg.db.dsn)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("opening sql connection: %w", err)
 	}
 
 	db.SetMaxOpenConns(cfg.db.maxOpenConns)
@@ -97,14 +97,9 @@ func openDB(cfg config) (*sql.DB, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Use PingContext() to establish a new connection to the database, passing in the
-	// context we created above as a parameter. If the connection couldn't be
-	// established successfully within the 5 second deadline, then this will return an
-	// error. If we get this error, or any other, we close the connection pool and
-	// return the error.
 	if err := db.PingContext(ctx); err != nil {
 		db.Close()
-		return nil, err
+		return nil, fmt.Errorf("pinging db: %w", err)
 	}
 
 	return db, nil

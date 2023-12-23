@@ -70,8 +70,7 @@ func (m MovieModel) Get(id int64) (*Movie, error) {
 		where id = $1`
 
 	var movie Movie
-
-	err := m.DB.QueryRow(query, id).Scan(
+	if err := m.DB.QueryRow(query, id).Scan(
 		&movie.ID,
 		&movie.CreatedAt,
 		&movie.Title,
@@ -79,8 +78,7 @@ func (m MovieModel) Get(id int64) (*Movie, error) {
 		&movie.Runtime,
 		pq.Array(&movie.Genres),
 		&movie.Version,
-	)
-	if err != nil {
+	); err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			return nil, ErrRecordNotFound
@@ -89,7 +87,7 @@ func (m MovieModel) Get(id int64) (*Movie, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("unimplemented")
+	return &movie, nil
 }
 
 func (m MovieModel) Update(movie *Movie) error {
