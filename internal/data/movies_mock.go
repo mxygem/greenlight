@@ -118,12 +118,13 @@ func (_c *MockMovies_Get_Call) RunAndReturn(run func(int64) (*Movie, error)) *Mo
 }
 
 // GetAll provides a mock function with given fields: title, genres, filters
-func (_m *MockMovies) GetAll(title string, genres []string, filters Filters) ([]*Movie, error) {
+func (_m *MockMovies) GetAll(title string, genres []string, filters Filters) ([]*Movie, Metadata, error) {
 	ret := _m.Called(title, genres, filters)
 
 	var r0 []*Movie
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string, []string, Filters) ([]*Movie, error)); ok {
+	var r1 Metadata
+	var r2 error
+	if rf, ok := ret.Get(0).(func(string, []string, Filters) ([]*Movie, Metadata, error)); ok {
 		return rf(title, genres, filters)
 	}
 	if rf, ok := ret.Get(0).(func(string, []string, Filters) []*Movie); ok {
@@ -134,13 +135,19 @@ func (_m *MockMovies) GetAll(title string, genres []string, filters Filters) ([]
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, []string, Filters) error); ok {
+	if rf, ok := ret.Get(1).(func(string, []string, Filters) Metadata); ok {
 		r1 = rf(title, genres, filters)
 	} else {
-		r1 = ret.Error(1)
+		r1 = ret.Get(1).(Metadata)
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(string, []string, Filters) error); ok {
+		r2 = rf(title, genres, filters)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // MockMovies_GetAll_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAll'
@@ -163,12 +170,12 @@ func (_c *MockMovies_GetAll_Call) Run(run func(title string, genres []string, fi
 	return _c
 }
 
-func (_c *MockMovies_GetAll_Call) Return(_a0 []*Movie, _a1 error) *MockMovies_GetAll_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *MockMovies_GetAll_Call) Return(_a0 []*Movie, _a1 Metadata, _a2 error) *MockMovies_GetAll_Call {
+	_c.Call.Return(_a0, _a1, _a2)
 	return _c
 }
 
-func (_c *MockMovies_GetAll_Call) RunAndReturn(run func(string, []string, Filters) ([]*Movie, error)) *MockMovies_GetAll_Call {
+func (_c *MockMovies_GetAll_Call) RunAndReturn(run func(string, []string, Filters) ([]*Movie, Metadata, error)) *MockMovies_GetAll_Call {
 	_c.Call.Return(run)
 	return _c
 }
