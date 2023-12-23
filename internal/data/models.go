@@ -15,16 +15,19 @@ var (
 // like a UserModel and PermissionModel, as our build progresses.
 type Models struct {
 	Movies Movies
+	Users  Users
 }
 
 func NewModels(db *sql.DB) Models {
 	return Models{
 		Movies: MovieModel{DB: db},
+		Users:  UserModel{DB: db},
 	}
 }
 
 func NewMockModels(t *testing.T) Models {
 	return Models{
 		Movies: NewMockMovies(t),
+		Users:  NewMockUsers(t),
 	}
 }

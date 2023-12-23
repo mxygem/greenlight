@@ -16,3 +16,4 @@ packages:
   github.com/mxygem/greenlight/internal/data:
     interfaces:
       Movies:
+      Users:
