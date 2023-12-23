@@ -100,7 +100,7 @@ func (m MovieModel) GetAll(title string, genres []string, filters Filters) ([]*M
 	query := `
 		select id, created_at, title, year, runtime, genres, version
 		from movies
-		where (lower(title) = lower($1) or $1 = '')
+		where (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) or $1 = '')
 		and (genres @> $2 or $2 = '{}')
 		order by id;`
 
