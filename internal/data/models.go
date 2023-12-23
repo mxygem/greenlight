@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql"
 	"errors"
+	"testing"
 )
 
 var (
@@ -21,8 +22,8 @@ func NewModels(db *sql.DB) Models {
 	}
 }
 
-func NewMockModels() Models {
+func NewMockModels(t *testing.T) Models {
 	return Models{
-		Movies: MockMovieModel{},
+		Movies: NewMockMovies(t),
 	}
 }
