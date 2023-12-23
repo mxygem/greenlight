@@ -97,11 +97,6 @@ func openDB(cfg config) (*sql.DB, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Use PingContext() to establish a new connection to the database, passing in the
-	// context we created above as a parameter. If the connection couldn't be
-	// established successfully within the 5 second deadline, then this will return an
-	// error. If we get this error, or any other, we close the connection pool and
-	// return the error.
 	if err := db.PingContext(ctx); err != nil {
 		db.Close()
 		return nil, err
