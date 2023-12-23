@@ -53,7 +53,7 @@ func main() {
 
 	db, err := openDB(cfg)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error(fmt.Sprintf("opening db: %s", err))
 		os.Exit(1)
 	}
 	defer db.Close()
@@ -78,7 +78,7 @@ func main() {
 	logger.Info("starting server", "addr", srv.Addr, "env", cfg.env)
 
 	if err := srv.ListenAndServe(); err != nil {
-		logger.Error(err.Error())
+		logger.Error(fmt.Sprintf("listen and serve: %q", err))
 		os.Exit(1)
 	}
 }
@@ -87,7 +87,7 @@ func main() {
 func openDB(cfg config) (*sql.DB, error) {
 	db, err := sql.Open("postgres", cfg.db.dsn)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("opening sql connection: %w", err)
 	}
 
 	db.SetMaxOpenConns(cfg.db.maxOpenConns)
@@ -99,7 +99,7 @@ func openDB(cfg config) (*sql.DB, error) {
 
 	if err := db.PingContext(ctx); err != nil {
 		db.Close()
-		return nil, err
+		return nil, fmt.Errorf("pinging db: %w", err)
 	}
 
 	return db, nil
