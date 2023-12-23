@@ -6,6 +6,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/lib/pq v1.10.9
 	github.com/stretchr/testify v1.8.4
+	github.com/tidwall/pretty v1.2.1
 )
 
 require (
