@@ -117,6 +117,62 @@ func (_c *MockMovies_Get_Call) RunAndReturn(run func(int64) (*Movie, error)) *Mo
 	return _c
 }
 
+// GetAll provides a mock function with given fields: title, genres, filters
+func (_m *MockMovies) GetAll(title string, genres []string, filters Filters) ([]*Movie, error) {
+	ret := _m.Called(title, genres, filters)
+
+	var r0 []*Movie
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, []string, Filters) ([]*Movie, error)); ok {
+		return rf(title, genres, filters)
+	}
+	if rf, ok := ret.Get(0).(func(string, []string, Filters) []*Movie); ok {
+		r0 = rf(title, genres, filters)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*Movie)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, []string, Filters) error); ok {
+		r1 = rf(title, genres, filters)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockMovies_GetAll_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAll'
+type MockMovies_GetAll_Call struct {
+	*mock.Call
+}
+
+// GetAll is a helper method to define mock.On call
+//   - title string
+//   - genres []string
+//   - filters Filters
+func (_e *MockMovies_Expecter) GetAll(title interface{}, genres interface{}, filters interface{}) *MockMovies_GetAll_Call {
+	return &MockMovies_GetAll_Call{Call: _e.mock.On("GetAll", title, genres, filters)}
+}
+
+func (_c *MockMovies_GetAll_Call) Run(run func(title string, genres []string, filters Filters)) *MockMovies_GetAll_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].([]string), args[2].(Filters))
+	})
+	return _c
+}
+
+func (_c *MockMovies_GetAll_Call) Return(_a0 []*Movie, _a1 error) *MockMovies_GetAll_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockMovies_GetAll_Call) RunAndReturn(run func(string, []string, Filters) ([]*Movie, error)) *MockMovies_GetAll_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Insert provides a mock function with given fields: movie
 func (_m *MockMovies) Insert(movie *Movie) error {
 	ret := _m.Called(movie)
