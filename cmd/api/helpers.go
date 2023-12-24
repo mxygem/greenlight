@@ -132,16 +132,17 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 }
 
 func (app *application) background(fn func()) {
-	// launch go routine
+	app.wg.Add(1)
+
 	go func() {
-		// recover any panics.
+		defer app.wg.Done()
+
 		defer func() {
 			if err := recover(); err != nil {
 				app.logger.Error("recovered from email send: %s", err)
 			}
 		}()
 
-		// execute fn
 		fn()
 	}()
 }
