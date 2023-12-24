@@ -33,7 +33,6 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	v := validator.New()
-	app.logger.Info("validating user", "user", user)
 	if data.ValidateUser(v, user); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
@@ -51,12 +50,14 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err := app.mailer.Send(user.Email, "user_welcome.tmpl", user); err != nil {
-		app.serverErrorResponse(w, r, fmt.Errorf("sending welcome email: %w", err))
-		return
-	}
+	app.background(func() {
+		if err := app.mailer.Send(user.Email, "user_welcome.tmpl", user); err != nil {
+			// app.serverErrorResponse(w, r, fmt.Errorf("sending welcome email: %w", err))
+			app.logger.Error("sending email: %s", err)
+		}
+	})
 
-	if err := app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil); err != nil {
+	if err := app.writeJSON(w, http.StatusAccepted, envelope{"user": user}, nil); err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
 }
