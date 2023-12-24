@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/mxygem/greenlight/internal/data"
 	"github.com/mxygem/greenlight/internal/validator"
@@ -50,9 +51,20 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	token, err := app.models.Tokens.New(user.ID, 3*24*time.Hour, data.ScopeActivation)
+	if err != nil {
+		app.serverErrorResponse(w, r, fmt.Errorf("creating new token: %w", err))
+		return
+	}
+
 	app.background(func() {
-		if err := app.mailer.Send(user.Email, "user_welcome.tmpl", user); err != nil {
-			// app.serverErrorResponse(w, r, fmt.Errorf("sending welcome email: %w", err))
+		data := map[string]any{
+			"activationToken": token.Plaintext,
+			"userID":          user.ID,
+			"name":            user.Name,
+		}
+
+		if err := app.mailer.Send(user.Email, "user_welcome.tmpl", data); err != nil {
 			app.logger.Error("sending email: %s", err)
 		}
 	})
