@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_\x60{|}~-]+@(?:[a-zA-Z0-9]+)(?:[.]+)(?:[a-zA-Z0-9]+)$")
 )
 
 // Validator is a type that contains a map of validation errors.

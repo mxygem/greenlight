@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -25,6 +24,7 @@ var (
 type testResp struct {
 	Error any        `json:"error,omitempty"`
 	Movie data.Movie `json:"movie,omitempty"`
+	User  data.User  `json:"user,omitempty"`
 }
 
 func TestCreateMovieHandler(t *testing.T) {
@@ -68,11 +68,9 @@ func TestCreateMovieHandler(t *testing.T) {
 				mov.On("Insert", expected).
 					Run(func(args mock.Arguments) {
 						mv := args.Get(0).(*data.Movie)
-						fmt.Printf("movie before: %+v\n", mv)
 						mv.ID = 100
 						mv.CreatedAt = testCreatedAt
 						mv.Version = 1
-						fmt.Printf("movie after: %+v\n", mv)
 						args[0] = mv
 					}).
 					Return(nil)

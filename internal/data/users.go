@@ -16,13 +16,13 @@ var (
 )
 
 type User struct {
-	ID        int64
-	CreatedAt time.Time
-	Name      string
-	Email     string
-	Password  password
-	Activated bool
-	Version   int
+	ID        int64     `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  password  `json:"-"`
+	Activated bool      `json:"activated"`
+	Version   int       `json:"-"`
 }
 
 type password struct {
@@ -39,7 +39,6 @@ func (p *password) Set(plaintextPassword string) error {
 	if err != nil {
 		return fmt.Errorf("generating hash from password: %w", err)
 	}
-	fmt.Printf("plain: %q hash: %q\n", plaintextPassword, string(hash))
 
 	p.plaintext = &plaintextPassword
 	p.hash = hash
@@ -110,7 +109,7 @@ func (m UserModel) Insert(user *User) error {
 	query := `
 		insert into users (name, email, password_hash, activated)
 		values ($1, $2, $3, $4)
-		return id, created_at, version`
+		returning id, created_at, version`
 
 	args := []any{user.Name, user.Email, user.Password.hash, user.Activated}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)

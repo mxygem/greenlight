@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/mxygem/greenlight/internal/validator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var (
-	usersTableRows       = sqlmock.NewRows([]string{"name", "email", "password_hash", "activated"})
 	usersTableReturnRows = sqlmock.NewRows([]string{"id", "created_at", "version"})
 	testCreatedAt        = time.Date(2000, time.May, 23, 7, 2, 0, 0, time.Local)
 )
@@ -32,7 +32,7 @@ func TestSet(t *testing.T) {
 		},
 		{
 			name:      "password too long",
-			plaintext: pass(t, 10001),
+			plaintext: longStr(t, 10001),
 			expected:  fmt.Errorf("generating hash from password: bcrypt: password length exceeds 72 bytes"),
 		},
 		{
@@ -53,12 +53,11 @@ func TestSet(t *testing.T) {
 				assert.Equal(t, tc.plaintext, *pw.plaintext)
 				assert.NoError(t, bcrypt.CompareHashAndPassword(pw.hash, []byte(tc.plaintext)))
 			}
-			t.Fail()
 		})
 	}
 }
 
-func TestMatch(t *testing.T) {
+func TestMatches(t *testing.T) {
 	testCases := []struct {
 		name        string
 		plaintext   string
@@ -111,11 +110,201 @@ func TestMatch(t *testing.T) {
 	}
 }
 
+func TestValidateUser(t *testing.T) {
+	testCases := []struct {
+		name         string
+		user         *User
+		expected     bool
+		expectedErrs map[string]string
+	}{
+		{
+			name: "valid user",
+			user: &User{
+				Name:  "Foo Bar",
+				Email: "foo.bar@email.com",
+				Password: password{
+					plaintext: strPtr(t, "abcd1234"),
+					hash:      []byte("thisIsAHashIPromise"),
+				},
+			},
+			expected: true,
+		},
+		{
+			name: "no name",
+			user: &User{
+				Name:     "",
+				Email:    "foo.bar@email.com",
+				Password: password{plaintext: strPtr(t, "abcd1234"), hash: []byte("t")},
+			},
+			expected: false,
+			expectedErrs: map[string]string{
+				"name": "must be provided",
+			},
+		},
+		{
+			name: "name too long",
+			user: &User{
+				Name:     longStr(t, 501),
+				Email:    "foo.bar@email.com",
+				Password: password{plaintext: strPtr(t, "abcd1234"), hash: []byte("t")},
+			},
+			expected: false,
+			expectedErrs: map[string]string{
+				"name": "must not be more than 500 bytes long",
+			},
+		},
+		{
+			name: "empty email",
+			user: &User{
+				Name:     "Foo Bar",
+				Email:    "",
+				Password: password{plaintext: strPtr(t, "abcd1234"), hash: []byte("t")},
+			},
+			expected: false,
+			expectedErrs: map[string]string{
+				"email": "must be provided",
+			},
+		},
+		{
+			name: "invalid email - only first name",
+			user: &User{
+				Name:     "Foo Bar",
+				Email:    "foo",
+				Password: password{plaintext: strPtr(t, "abcd1234"), hash: []byte("t")},
+			},
+			expected: false,
+			expectedErrs: map[string]string{
+				"email": "must be a valid email address",
+			},
+		},
+		{
+			name: "invalid email - only name",
+			user: &User{
+				Name:     "Foo Bar",
+				Email:    "foo.bar",
+				Password: password{plaintext: strPtr(t, "abcd1234"), hash: []byte("t")},
+			},
+			expected: false,
+			expectedErrs: map[string]string{
+				"email": "must be a valid email address",
+			},
+		},
+		{
+			name: "invalid email - missing domain",
+			user: &User{
+				Name:     "Foo Bar",
+				Email:    "foo.bar@",
+				Password: password{plaintext: strPtr(t, "abcd1234"), hash: []byte("t")},
+			},
+			expected: false,
+			expectedErrs: map[string]string{
+				"email": "must be a valid email address",
+			},
+		},
+		{
+			name: "invalid email - missing domain end",
+			user: &User{
+				Name:     "Foo Bar",
+				Email:    "bar@email",
+				Password: password{plaintext: strPtr(t, "abcd1234"), hash: []byte("t")},
+			},
+			expected: false,
+			expectedErrs: map[string]string{
+				"email": "must be a valid email address",
+			},
+		},
+		{
+			name: "invalid email - missing domain ending",
+			user: &User{
+				Name:     "Foo Bar",
+				Email:    "foo.bar@email.",
+				Password: password{plaintext: strPtr(t, "abcd1234"), hash: []byte("t")},
+			},
+			expected: false,
+			expectedErrs: map[string]string{
+				"email": "must be a valid email address",
+			},
+		},
+		{
+			name: "invalid email - only domain",
+			user: &User{
+				Name:     "Foo Bar",
+				Email:    "email.com",
+				Password: password{plaintext: strPtr(t, "abcd1234"), hash: []byte("t")},
+			},
+			expected: false,
+			expectedErrs: map[string]string{
+				"email": "must be a valid email address",
+			},
+		},
+		{
+			name: "invalid password - empty",
+			user: &User{Name: "Foo Bar", Email: "foo.bar@email.com",
+				Password: password{
+					plaintext: strPtr(t, ""),
+					hash:      []byte("t"),
+				},
+			},
+			expected: false,
+			expectedErrs: map[string]string{
+				"password": "must be provided",
+			},
+		},
+		{
+			name: "invalid password - too short",
+			user: &User{Name: "Foo Bar", Email: "foo.bar@email.com",
+				Password: password{
+					plaintext: strPtr(t, "hi"),
+					hash:      []byte("t"),
+				},
+			},
+			expected: false,
+			expectedErrs: map[string]string{
+				"password": "must be at least 8 bytes long",
+			},
+		},
+		{
+			name: "invalid password - too long",
+			user: &User{Name: "Foo Bar", Email: "foo.bar@email.com",
+				Password: password{
+					plaintext: strPtr(t, longStr(t, 73)),
+					hash:      []byte("t"),
+				},
+			},
+			expected: false,
+			expectedErrs: map[string]string{
+				"password": "must not be more than 72 bytes long",
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			v := validator.New()
+
+			ValidateUser(v, tc.user)
+
+			assert.Equal(t, tc.expected, v.Valid())
+			if tc.expected {
+				assert.Len(t, v.Errors, 0)
+			} else {
+				assert.Equal(t, tc.expectedErrs, v.Errors)
+			}
+		})
+	}
+}
+
+func TestValidateUserPanicWithNoHash(t *testing.T) {
+	v := validator.New()
+
+	assert.Panics(t, func() { ValidateUser(v, &User{}) })
+}
+
 func TestUserInsert(t *testing.T) {
 	insertQuery := `
 		insert into users (name, email, password_hash, activated)
 		values ($1, $2, $3, $4)
-		return id, created_at, version`
+		returning id, created_at, version`
 	testCases := []struct {
 		name        string
 		user        *User
@@ -229,7 +418,7 @@ func checkErr(t *testing.T, expected, actual error) {
 	}
 }
 
-func pass(t *testing.T, len int) string {
+func longStr(t *testing.T, len int) string {
 	var out strings.Builder
 	out.Grow(len)
 
