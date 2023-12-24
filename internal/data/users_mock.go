@@ -75,6 +75,61 @@ func (_c *MockUsers_GetByEmail_Call) RunAndReturn(run func(string) (*User, error
 	return _c
 }
 
+// GetForToken provides a mock function with given fields: tokenScope, tokenPlaintext
+func (_m *MockUsers) GetForToken(tokenScope string, tokenPlaintext string) (*User, error) {
+	ret := _m.Called(tokenScope, tokenPlaintext)
+
+	var r0 *User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (*User, error)); ok {
+		return rf(tokenScope, tokenPlaintext)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) *User); ok {
+		r0 = rf(tokenScope, tokenPlaintext)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(tokenScope, tokenPlaintext)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockUsers_GetForToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetForToken'
+type MockUsers_GetForToken_Call struct {
+	*mock.Call
+}
+
+// GetForToken is a helper method to define mock.On call
+//   - tokenScope string
+//   - tokenPlaintext string
+func (_e *MockUsers_Expecter) GetForToken(tokenScope interface{}, tokenPlaintext interface{}) *MockUsers_GetForToken_Call {
+	return &MockUsers_GetForToken_Call{Call: _e.mock.On("GetForToken", tokenScope, tokenPlaintext)}
+}
+
+func (_c *MockUsers_GetForToken_Call) Run(run func(tokenScope string, tokenPlaintext string)) *MockUsers_GetForToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockUsers_GetForToken_Call) Return(_a0 *User, _a1 error) *MockUsers_GetForToken_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockUsers_GetForToken_Call) RunAndReturn(run func(string, string) (*User, error)) *MockUsers_GetForToken_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Insert provides a mock function with given fields: user
 func (_m *MockUsers) Insert(user *User) error {
 	ret := _m.Called(user)

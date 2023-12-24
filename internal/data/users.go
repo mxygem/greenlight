@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -96,6 +97,7 @@ type Users interface {
 	Insert(user *User) error
 	GetByEmail(email string) (*User, error)
 	Update(user *User) error
+	GetForToken(tokenScope, tokenPlaintext string) (*User, error)
 }
 
 // UserModel represents a user in the database and wraps the connection pool.
@@ -190,4 +192,41 @@ func (m UserModel) Update(user *User) error {
 	}
 
 	return nil
+}
+
+func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error) {
+	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
+
+	query := `
+		select u.id, u.created_at, u.name, u.email, u.password_hash, u.activated, u.version
+		from users u
+		inner join tokens t
+		on u.id = t.user_id
+		where t.hash = $1
+		and t.scope = $2
+		and t.expiry > $3`
+
+	args := []any{tokenHash[:], tokenScope, time.Now()}
+	var user User
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	if err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.Name,
+		&user.Email,
+		&user.Password.hash,
+		&user.Activated,
+		&user.Version,
+	); err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, fmt.Errorf("unexpected error querying user by token: %w", err)
+		}
+	}
+
+	return &user, nil
 }

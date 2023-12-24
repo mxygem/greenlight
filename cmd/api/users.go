@@ -73,3 +73,42 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		TokenPlaintext string `json:"token"`
+	}
+
+	if err := app.readJSON(w, r, &input); err != nil {
+		app.badRequestResponse(w, r, fmt.Errorf("reading request body: %w", err))
+		return
+	}
+
+	v := validator.New()
+
+	if data.ValidateTokenPlaintext(v, input.TokenPlaintext); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	user, err := app.models.Users.GetForToken(data.ScopeActivation, input.TokenPlaintext)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.editConflictResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, fmt.Errorf("unexpected error getting user by token: %w", err))
+		}
+
+		return
+	}
+
+	if err := app.models.Tokens.DeleteAllForUser(data.ScopeActivation, user.ID); err != nil {
+		app.serverErrorResponse(w, r, fmt.Errorf("deleting tokens for activated user: %w", err))
+		return
+	}
+
+	if err := app.writeJSON(w, http.StatusOK, envelope{"user": user}, nil); err != nil {
+		app.serverErrorResponse(w, r, fmt.Errorf("writing activation response: %w", err))
+	}
+}
