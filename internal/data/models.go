@@ -16,12 +16,14 @@ var (
 type Models struct {
 	Movies Movies
 	Users  Users
+	Tokens Tokens
 }
 
 func NewModels(db *sql.DB) Models {
 	return Models{
 		Movies: MovieModel{DB: db},
 		Users:  UserModel{DB: db},
+		Tokens: TokenModel{DB: db},
 	}
 }
 
@@ -29,5 +31,6 @@ func NewMockModels(t *testing.T) Models {
 	return Models{
 		Movies: NewMockMovies(t),
 		Users:  NewMockUsers(t),
+		Tokens: NewMockTokens(t),
 	}
 }
