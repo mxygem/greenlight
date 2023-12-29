@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -25,6 +26,7 @@ type config struct {
 	db      db
 	limiter limiter
 	smtp    smtp
+	cors    cors
 }
 
 type db struct {
@@ -56,6 +58,10 @@ type application struct {
 	wg     sync.WaitGroup
 }
 
+type cors struct {
+	trustedOrigins []string
+}
+
 func main() {
 	var cfg config
 
@@ -77,6 +83,11 @@ func main() {
 	flag.StringVar(&cfg.smtp.username, "smtp-username", "a67a1617059c7a", "SMTP username")
 	flag.StringVar(&cfg.smtp.password, "smtp-password", "1e5b8d0e9724cd", "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.mxy.dev>", "SMTP sender")
+
+	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(s string) error {
+		cfg.cors.trustedOrigins = strings.Fields(s)
+		return nil
+	})
 
 	flag.Parse()
 
