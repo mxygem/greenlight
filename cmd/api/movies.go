@@ -10,8 +10,8 @@ import (
 )
 
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
-	app.logger.Info("application createMovieHandler start")
-	defer app.logger.Info("application createMovieHandler end")
+	// app.logger.Info("application createMovieHandler start")
+	// defer app.logger.Info("application createMovieHandler end")
 
 	var input struct {
 		Title   string       `json:"title"`
@@ -51,8 +51,8 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
-	app.logger.Info("application showMovieHandler start")
-	defer app.logger.Info("application showMovieHandler end")
+	// app.logger.Info("application showMovieHandler start")
+	// defer app.logger.Info("application showMovieHandler end")
 
 	id, err := app.readIDParam(r)
 	if err != nil {
@@ -78,8 +78,8 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Request) {
-	app.logger.Info("application updateMovieHandler start")
-	defer app.logger.Info("application updateMovieHandler end")
+	// app.logger.Info("application updateMovieHandler start")
+	// defer app.logger.Info("application updateMovieHandler end")
 
 	id, err := app.readIDParam(r)
 	if err != nil {
