@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 type UserPermissions []string
@@ -23,6 +25,7 @@ type PermissionModel struct {
 
 type Permissions interface {
 	GetAllForUser(userID int64) (UserPermissions, error)
+	AddForUser(userID int64, codes ...string) error
 }
 
 // GetAllForUser returns all permission codes for a specific user in a Permissions slice.
@@ -58,4 +61,16 @@ func (m PermissionModel) GetAllForUser(userID int64) (UserPermissions, error) {
 	}
 
 	return permissions, nil
+}
+
+func (m PermissionModel) AddForUser(userID int64, codes ...string) error {
+	query := `
+		insert into users_permissions
+		select $1, permissions.id from permissions where permissions.code = any($2)`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, userID, pq.Array(codes))
+	return err
 }

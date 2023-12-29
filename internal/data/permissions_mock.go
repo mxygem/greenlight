@@ -21,6 +21,63 @@ func (_m *MockPermissions) EXPECT() *MockPermissions_Expecter {
 	return &MockPermissions_Expecter{mock: &_m.Mock}
 }
 
+// AddForUser provides a mock function with given fields: userID, codes
+func (_m *MockPermissions) AddForUser(userID int64, codes ...string) error {
+	_va := make([]interface{}, len(codes))
+	for _i := range codes {
+		_va[_i] = codes[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, userID)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int64, ...string) error); ok {
+		r0 = rf(userID, codes...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockPermissions_AddForUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AddForUser'
+type MockPermissions_AddForUser_Call struct {
+	*mock.Call
+}
+
+// AddForUser is a helper method to define mock.On call
+//   - userID int64
+//   - codes ...string
+func (_e *MockPermissions_Expecter) AddForUser(userID interface{}, codes ...interface{}) *MockPermissions_AddForUser_Call {
+	return &MockPermissions_AddForUser_Call{Call: _e.mock.On("AddForUser",
+		append([]interface{}{userID}, codes...)...)}
+}
+
+func (_c *MockPermissions_AddForUser_Call) Run(run func(userID int64, codes ...string)) *MockPermissions_AddForUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]string, len(args)-1)
+		for i, a := range args[1:] {
+			if a != nil {
+				variadicArgs[i] = a.(string)
+			}
+		}
+		run(args[0].(int64), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockPermissions_AddForUser_Call) Return(_a0 error) *MockPermissions_AddForUser_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockPermissions_AddForUser_Call) RunAndReturn(run func(int64, ...string) error) *MockPermissions_AddForUser_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetAllForUser provides a mock function with given fields: userID
 func (_m *MockPermissions) GetAllForUser(userID int64) (UserPermissions, error) {
 	ret := _m.Called(userID)
