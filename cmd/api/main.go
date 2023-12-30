@@ -16,10 +16,11 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/mxygem/greenlight/internal/data"
 	"github.com/mxygem/greenlight/internal/mailer"
+	"github.com/mxygem/greenlight/internal/vcs"
 )
 
-const (
-	version = "1.0.0"
+var (
+	version = vcs.Version()
 )
 
 type config struct {
@@ -86,13 +87,20 @@ func main() {
 	flag.StringVar(&cfg.smtp.username, "smtp-username", "a67a1617059c7a", "SMTP username")
 	flag.StringVar(&cfg.smtp.password, "smtp-password", "1e5b8d0e9724cd", "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.mxy.dev>", "SMTP sender")
-
+	// cors
 	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(s string) error {
 		cfg.cors.trustedOrigins = strings.Fields(s)
 		return nil
 	})
+	// versions
+	displayVersion := flag.Bool("version", false, "Display the version and exit")
 
 	flag.Parse()
+
+	if *displayVersion {
+		fmt.Printf("Version:\t%s\n", version)
+		os.Exit(0)
+	}
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
