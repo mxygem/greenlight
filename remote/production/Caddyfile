@@ -1,0 +1,8 @@
+{
+    email greenlight@mxy.dev
+}
+
+greenlight.mxy.dev {
+    respond /debug/* "Not Permitted" 403
+    reverse_proxy localhost:4000
+}
